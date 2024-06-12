@@ -1,8 +1,10 @@
+// review.component.ts
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { Review } from '../data.interfaces';
 import { ReviewService } from './review.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-review',
@@ -30,7 +32,6 @@ import { AuthService } from '../auth/auth.service';
               d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"
             />
           </svg>
-
           <svg
             *ngFor="let _ of [].constructor(5 - (review?.rating || 0))"
             xmlns="http://www.w3.org/2000/svg"
@@ -62,15 +63,19 @@ import { AuthService } from '../auth/auth.service';
       </div>
     </div>
   `,
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  providers: [ReviewService],
 })
 export class ReviewComponent {
+  @Input() review?: Review;
+  @Output() onEdit = new EventEmitter<Review>();
+  @Output() onDelete = new EventEmitter<string>();
+
   #router = inject(Router);
   #authService = inject(AuthService);
   #reviewService = inject(ReviewService);
   #activatedRoute = inject(ActivatedRoute);
-  @Input() review?: Review;
-  @Output() onEdit = new EventEmitter();
-  @Output() onDelete = new EventEmitter();
 
   editReview(review?: Review) {
     this.onEdit.emit(review);
@@ -86,7 +91,7 @@ export class ReviewComponent {
       this.#reviewService
         .deleteReview(medicationId, this.review?._id || '')
         .subscribe(() => {
-          this.onDelete.emit();
+          this.onDelete.emit(this.review?._id || '');
         });
     }
   }

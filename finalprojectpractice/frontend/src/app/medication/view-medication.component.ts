@@ -1,9 +1,11 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { Medication, Review } from '../data.interfaces';
-import { MedicationService } from './medication.service';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { AuthService } from '../auth/auth.service';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MedicationService } from './medication.service';
+import { Medication, Review } from '../data.interfaces';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
+import { AuthService } from '../auth/auth.service';
+import { ReviewComponent } from '../review/review.component';
+import { CreateReviewComponent } from '../review/create-review.component';
 
 @Component({
   selector: 'view-medication',
@@ -23,11 +25,21 @@ import { CommonModule } from '@angular/common';
       <div *ngIf="loggedIn" class="actions">
         <button *ngIf="canEdit" (click)="editMedication()">Edit</button>
         <button *ngIf="canEdit" (click)="deleteMedication()">Delete</button>
+        <button (click)="addReview()">Add Review</button>
       </div>
+      <app-review
+        *ngFor="let review of medication.reviews"
+        [review]="review"
+        (onDelete)="removeReview(review._id)"
+      ></app-review>
+      <app-create-review
+        *ngIf="showCreateReview"
+        (onCreate)="addNewReview($event)"
+      ></app-create-review>
     </div>
   `,
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ReviewComponent, CreateReviewComponent],
   styles: [
     `
       .medication-details {
@@ -57,10 +69,9 @@ import { CommonModule } from '@angular/common';
     `,
   ],
 })
-export class ViewMedicationComponent implements OnInit {
-  imageData: any;
+export class ViewMedicationComponent {
   medication?: Medication;
-  review?: Review;
+  showCreateReview = false;
 
   #router = inject(Router);
   #authService = inject(AuthService);
@@ -120,6 +131,25 @@ export class ViewMedicationComponent implements OnInit {
         .subscribe(() => {
           this.#router.navigate(['', 'medications']);
         });
+    }
+  }
+
+  addReview() {
+    this.showCreateReview = true;
+  }
+
+  addNewReview(review: Review) {
+    if (this.medication) {
+      this.medication.reviews.push(review);
+      this.showCreateReview = false;
+    }
+  }
+
+  removeReview(reviewId: string) {
+    if (this.medication) {
+      this.medication.reviews = this.medication.reviews.filter(
+        (review) => review._id !== reviewId
+      );
     }
   }
 }

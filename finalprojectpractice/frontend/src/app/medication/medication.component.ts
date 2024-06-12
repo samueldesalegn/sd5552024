@@ -1,8 +1,9 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MedicationService } from './medication.service';
 import { Medication } from '../data.interfaces';
 import { range } from 'lodash';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'medication-list',
@@ -18,7 +19,11 @@ import { range } from 'lodash';
       </div>
       <div class="medications">
         <div *ngFor="let medication of medications" class="medication">
-          <h4>{{ medication.name }}</h4>
+          <h4>
+            <a [routerLink]="['/medications', medication._id]">{{
+              medication.name
+            }}</a>
+          </h4>
           <p>{{ medication.generic_name }}</p>
           <p>{{ medication.medication_class }}</p>
         </div>
@@ -26,7 +31,7 @@ import { range } from 'lodash';
     </div>
   `,
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   styles: [
     `
       .container {
@@ -53,10 +58,9 @@ import { range } from 'lodash';
     `,
   ],
 })
-export class MedicationListComponent implements OnInit {
+export class MedicationListComponent {
   #medicationService = inject(MedicationService);
   letters = range(1, 27).map((i) => String.fromCharCode(64 + i));
-
   medications: Medication[] = [];
   firstLetter = 'A';
 

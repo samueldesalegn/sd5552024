@@ -1,11 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-  inject,
-  OnChanges,
-} from '@angular/core';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ReviewService } from './review.service';
 import { ActivatedRoute } from '@angular/router';
@@ -28,9 +21,7 @@ import { Review } from '../data.interfaces';
             <span>{{ star }}</span>
           </label>
         </div>
-        <button type="submit">
-          {{ review?._id ? 'Update' : 'Create' }} Review
-        </button>
+        <button type="submit">Create Review</button>
       </form>
     </div>
   `,
@@ -57,10 +48,8 @@ import { Review } from '../data.interfaces';
     `,
   ],
 })
-export class CreateReviewComponent implements OnChanges {
-  @Input() review?: Review;
+export class CreateReviewComponent {
   @Output() onCreate = new EventEmitter<Review>();
-  @Output() onUpdate = new EventEmitter<void>();
 
   #activatedRoute = inject(ActivatedRoute);
   #reviewService = inject(ReviewService);
@@ -68,20 +57,6 @@ export class CreateReviewComponent implements OnChanges {
     review: ['', Validators.required],
     rating: [0, Validators.min(1)],
   });
-
-  ngOnChanges() {
-    if (this.review) {
-      this.form.setValue({
-        review: this.review.review,
-        rating: this.review.rating,
-      });
-    } else {
-      this.form.reset({
-        review: '',
-        rating: 0,
-      });
-    }
-  }
 
   setRating(rating: number) {
     this.form.patchValue({ rating });
@@ -97,21 +72,11 @@ export class CreateReviewComponent implements OnChanges {
       return;
     }
     const medicationId = this.#activatedRoute.snapshot.params['id'];
-    if (this.review?._id) {
-      this.#reviewService
-        .updateReview(medicationId, this.review._id, this.form.value as Review)
-        .subscribe(() => {
-          this.onUpdate.emit();
-          this.form.reset();
-          this.review = undefined;
-        });
-    } else {
-      this.#reviewService
-        .createReview(medicationId, this.form.value as Review)
-        .subscribe((data) => {
-          this.onCreate.emit(data);
-          this.form.reset();
-        });
-    }
+    this.#reviewService
+      .createReview(medicationId, this.form.value as Review)
+      .subscribe((data) => {
+        this.onCreate.emit(data);
+        this.form.reset();
+      });
   }
 }

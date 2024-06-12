@@ -19,7 +19,9 @@ import { Medication } from '../data.interfaces';
         class="space-y-5 max-w-xl mx-auto"
         (ngSubmit)="submit()"
       >
-        <h3 class="text-xl font-bold">Create Medication</h3>
+        <h3 class="text-xl font-bold">
+          {{ medication ? 'Edit' : 'Create' }} Medication
+        </h3>
         <input
           type="text"
           placeholder="Medication Name"
@@ -81,7 +83,7 @@ import { Medication } from '../data.interfaces';
           [disabled]="form.invalid"
           class="bg-blue-500 text-white py-3 px-10 w-full rounded-md disabled:opacity-50"
         >
-          Create
+          {{ medication ? 'Update' : 'Create' }}
         </button>
       </form>
     </div>
